@@ -7,7 +7,7 @@ const app = express();
 // CORS config (cho phép frontend gọi API)
 app.use(
   cors({
-    origin: ["https://ngc-khanh2915.github.io"],
+    origin: ["https://github.com/ngc-khanh2915"],
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
   }),
