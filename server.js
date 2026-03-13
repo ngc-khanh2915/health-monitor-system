@@ -7,8 +7,9 @@ const app = express();
 // CORS config (cho phép frontend gọi API)
 app.use(
   cors({
-    origin: "*", // cho phép mọi domain (đơn giản nhất)
-    methods: ["GET", "POST"],
+    origin: ["https://ngc-khanh2915.github.io"],
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
   }),
 );
 
