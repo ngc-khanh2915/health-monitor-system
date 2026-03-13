@@ -37,16 +37,15 @@
             div.className = "card";
 
             div.innerHTML = `
-            <b>Bệnh nhân:</b> ${row.mabenhnhan}<br>
-            <b>Nhịp tim:</b> ${row.nhiptim} bpm<br>
-            <b>SpO2:</b> ${row.nongdooxy} %<br>
-            <b>Thời gian:</b> ${row.thoigiando}
-        `;
+        <p>Bệnh nhân: ${row.mabenhnhan}</p>
+        <p>Nhịp tim: ${row.nhiptim}</p>
+        <p>SpO2: ${row.nongdooxy}</p>
+        <p>Trạng thái: ${row.trangthai}</p>
+      `;
 
             container.appendChild(div);
           });
-        })
-        .catch((err) => console.error(err));
+        });
     </script>
   </body>
 </html>
