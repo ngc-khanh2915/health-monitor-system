@@ -4,13 +4,11 @@ const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 
-// CORS config - cho phép GitHub Pages & frontend gọi API
+// CORS config (cho phép frontend gọi API)
 app.use(
   cors({
-    origin: "*", // cho phép mọi domain
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    origin: "*", // cho phép mọi domain (đơn giản nhất)
+    methods: ["GET", "POST"],
   }),
 );
 
@@ -31,7 +29,7 @@ app.get("/", (req, res) => {
 // ===== API 1: danh sách bệnh nhân =====
 app.get("/benhnhan", async (req, res) => {
   try {
-    const { data, error } = await supabase.from("BenhNhan").select("*");
+    const { data, error } = await supabase.from("benhnhan").select("*");
 
     if (error) throw error;
 
@@ -46,9 +44,9 @@ app.get("/benhnhan", async (req, res) => {
 app.get("/sinh-ton", async (req, res) => {
   try {
     const { data, error } = await supabase
-      .from("LichSuSinhTon")
+      .from("lichsusinhton")
       .select("*")
-      .order("ThoiGianDo", { ascending: false })
+      .order("thoigiando", { ascending: false })
       .limit(50);
 
     if (error) throw error;
@@ -66,10 +64,10 @@ app.get("/sinh-ton/:mabenhnhan", async (req, res) => {
     const { mabenhnhan } = req.params;
 
     const { data, error } = await supabase
-      .from("LichSuSinhTon")
+      .from("lichsusinhton")
       .select("*")
-      .eq("MaBenhNhan", mabenhnhan)
-      .order("ThoiGianDo", { ascending: false })
+      .eq("mabenhnhan", mabenhnhan)
+      .order("thoigiando", { ascending: false })
       .limit(50);
 
     if (error) throw error;
