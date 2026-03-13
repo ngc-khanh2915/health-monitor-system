@@ -3,7 +3,15 @@ const cors = require("cors");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
-app.use(cors());
+
+// CORS config (cho phép frontend gọi API)
+app.use(
+  cors({
+    origin: "*", // cho phép mọi domain (đơn giản nhất)
+    methods: ["GET", "POST"],
+  }),
+);
+
 app.use(express.json());
 
 // Supabase config
@@ -13,49 +21,65 @@ const supabaseKey =
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// test server
+// ===== Test server =====
 app.get("/", (req, res) => {
   res.send("Health Monitor API is running");
 });
 
-// API 1
+// ===== API 1: danh sách bệnh nhân =====
 app.get("/benhnhan", async (req, res) => {
-  const { data, error } = await supabase.from("benhnhan").select("*");
+  try {
+    const { data, error } = await supabase.from("benhnhan").select("*");
 
-  if (error) return res.status(500).json({ error: error.message });
+    if (error) throw error;
 
-  res.json(data);
+    res.json(data);
+  } catch (err) {
+    console.error("API /benhnhan error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// API 2
+// ===== API 2: dữ liệu sinh tồn mới nhất =====
 app.get("/sinh-ton", async (req, res) => {
-  const { data, error } = await supabase
-    .from("lichsusinhton")
-    .select("*")
-    .order("thoigiando", { ascending: false })
-    .limit(50);
+  try {
+    const { data, error } = await supabase
+      .from("lichsusinhton")
+      .select("*")
+      .order("thoigiando", { ascending: false })
+      .limit(50);
 
-  if (error) return res.status(500).json({ error: error.message });
+    if (error) throw error;
 
-  res.json(data);
+    res.json(data);
+  } catch (err) {
+    console.error("API /sinh-ton error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// API 3
+// ===== API 3: sinh tồn theo bệnh nhân =====
 app.get("/sinh-ton/:mabenhnhan", async (req, res) => {
-  const { mabenhnhan } = req.params;
+  try {
+    const { mabenhnhan } = req.params;
 
-  const { data, error } = await supabase
-    .from("lichsusinhton")
-    .select("*")
-    .eq("mabenhnhan", mabenhnhan)
-    .order("thoigiando", { ascending: false })
-    .limit(50);
+    const { data, error } = await supabase
+      .from("lichsusinhton")
+      .select("*")
+      .eq("mabenhnhan", mabenhnhan)
+      .order("thoigiando", { ascending: false })
+      .limit(50);
 
-  if (error) return res.status(500).json({ error: error.message });
+    if (error) throw error;
 
-  res.json(data);
+    res.json(data);
+  } catch (err) {
+    console.error("API /sinh-ton/:mabenhnhan error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
+// ===== Start server =====
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
