@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Health Monitor</title>
+
+    <style>
+      body {
+        font-family: Arial;
+        background: #f5f5f5;
+        padding: 40px;
+      }
+
+      .card {
+        background: white;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>Dữ liệu sinh tồn</h1>
+
+    <div id="data"></div>
+
+    <script>
+      fetch("http://localhost:3000/sinh-ton")
+        .then((response) => response.json())
+        .then((data) => {
+          const container = document.getElementById("data");
+
+          data.forEach((row) => {
+            const div = document.createElement("div");
+            div.className = "card";
+
+            div.innerHTML = `
+            <b>Bệnh nhân:</b> ${row.mabenhnhan}<br>
+            <b>Nhịp tim:</b> ${row.nhiptim} bpm<br>
+            <b>SpO2:</b> ${row.nongdooxy} %<br>
+            <b>Thời gian:</b> ${row.thoigiando}
+        `;
+
+            container.appendChild(div);
+          });
+        })
+        .catch((err) => console.error(err));
+    </script>
+  </body>
+</html>
