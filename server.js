@@ -12,6 +12,8 @@ app.use(
   }),
 );
 
+app.options("*", cors()); // Handle CORS preflight requests
+
 app.use(express.json());
 
 // Supabase config
@@ -48,6 +50,8 @@ app.get("/sinh-ton", async (req, res) => {
       .select("*")
       .order("thoigiando", { ascending: false })
       .limit(50);
+
+    console.log("Raw data from Supabase:", JSON.stringify(data, null, 2)); // Log để xem field names
 
     if (error) throw error;
 

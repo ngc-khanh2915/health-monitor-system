@@ -28,39 +28,26 @@
 
     <script>
       fetch("https://health-monitor-system-pnhi3.onrender.com/sinh-ton")
-        .then((response) => {
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          return response.json();
-        })
+        .then((response) => response.json())
         .then((data) => {
           const container = document.getElementById("data");
-
-          if (!data || data.length === 0) {
-            container.innerHTML =
-              "<p style='color: orange;'>⚠️ Không có dữ liệu</p>";
-            return;
-          }
 
           data.forEach((row) => {
             const div = document.createElement("div");
             div.className = "card";
 
             div.innerHTML = `
-              <p><strong>Bệnh nhân:</strong> ${row.MaBenhNhan || "N/A"}</p>
-              <p><strong>Nhịp tim:</strong> ${row.NhipTim || "N/A"} bpm</p>
-              <p><strong>SpO2:</strong> ${row.NongDoOxy || "N/A"}%</p>
-              <p><strong>Trạng thái:</strong> ${row.TrangThai || "N/A"}</p>
-              <small style="color: #999;">⏰ ${row.ThoiGianDo || "N/A"}</small>
-            `;
+            <p>Bệnh nhân: ${row.mabenhnhan}</p>
+            <p>Nhịp tim: ${row.nhiptim}</p>
+            <p>SpO2: ${row.nongdooxy}</p>
+            <p>Trạng thái: ${row.trangthai}</p>
+          `;
 
             container.appendChild(div);
           });
         })
         .catch((error) => {
-          document.getElementById("data").innerHTML =
-            `<p style='color: red;'>❌ Lỗi: ${error.message}</p>
-             <p style='font-size: 12px;'>Mở Console (F12) để xem chi tiết</p>`;
-          console.error("Chi tiết:", error);
+          console.error("Lỗi khi fetch dữ liệu:", error);
         });
     </script>
   </body>
