@@ -447,6 +447,166 @@
         height: 14px;
       }
 
+      /* ── ALERT MODAL ── */
+      .alert-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.2s ease;
+      }
+
+      .alert-overlay.active {
+        display: flex;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .alert-box {
+        background: #1a0000;
+        border: 2px solid #e05252;
+        border-radius: 16px;
+        padding: 36px 40px;
+        max-width: 520px;
+        width: 90%;
+        box-shadow: 0 0 60px rgba(224, 82, 82, 0.4);
+        animation:
+          slideUp 0.25s ease,
+          glowPulse 1.2s ease-in-out infinite;
+        position: relative;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes glowPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 40px rgba(224, 82, 82, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 70px rgba(224, 82, 82, 0.7);
+        }
+      }
+
+      .alert-icon {
+        font-size: 2.8rem;
+        text-align: center;
+        margin-bottom: 14px;
+        animation: iconBlink 0.6s ease-in-out infinite alternate;
+      }
+
+      @keyframes iconBlink {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0.6;
+          transform: scale(1.15);
+        }
+      }
+
+      .alert-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #ff6b6b;
+        text-align: center;
+        margin-bottom: 8px;
+        letter-spacing: 0.04em;
+      }
+
+      .alert-subtitle {
+        font-size: 0.82rem;
+        color: #ffaaaa;
+        text-align: center;
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+
+      .alert-list {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 24px;
+        max-height: 200px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #e05252 #2a0000;
+      }
+
+      .alert-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.83rem;
+        color: #ffd0d0;
+      }
+
+      .alert-list-item:last-child {
+        border-bottom: none;
+      }
+
+      .alert-list-item .pid {
+        font-family: "DM Mono", monospace;
+        color: #fff;
+        font-weight: 600;
+      }
+
+      .alert-list-item .status-tag {
+        background: rgba(224, 82, 82, 0.25);
+        color: #ff8080;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 600;
+      }
+
+      .alert-confirm-btn {
+        width: 100%;
+        padding: 13px;
+        background: #e05252;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-family: "Sora", sans-serif;
+        font-size: 0.92rem;
+        font-weight: 700;
+        cursor: pointer;
+        letter-spacing: 0.05em;
+        transition:
+          background 0.2s,
+          transform 0.1s;
+      }
+
+      .alert-confirm-btn:hover {
+        background: #c0392b;
+      }
+      .alert-confirm-btn:active {
+        transform: scale(0.98);
+      }
+
       /* ── RESPONSIVE ── */
       @media (max-width: 860px) {
         .summary-row {
@@ -569,8 +729,117 @@
       </div>
     </main>
 
+    <!-- ALERT MODAL -->
+    <div class="alert-overlay" id="alert-overlay">
+      <div class="alert-box">
+        <div class="alert-icon">🚨</div>
+        <div class="alert-title">CẢNH BÁO KHẨN CẤP</div>
+        <div class="alert-subtitle">
+          Phát hiện bệnh nhân có chỉ số bất thường!<br />Vui lòng kiểm tra và xử
+          lý ngay.
+        </div>
+        <div class="alert-list" id="alert-list"></div>
+        <button class="alert-confirm-btn" onclick="dismissAlert()">
+          ✔ ĐÃ XÁC NHẬN
+        </button>
+      </div>
+    </div>
+
     <script>
       let allData = [];
+      let alertDismissed = false; // reset mỗi lần load mới
+      let alarmOscillators = [];
+
+      /* ── TIẾNG RÚ ALARM (Web Audio API) ── */
+      function startAlarm() {
+        stopAlarm();
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function beepCycle() {
+          const now = ctx.currentTime;
+          // Tạo 2 tone xen kẽ: 880Hz và 660Hz
+          [880, 660].forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(freq, now + idx * 0.25);
+            gain.gain.setValueAtTime(0, now + idx * 0.25);
+            gain.gain.linearRampToValueAtTime(0.35, now + idx * 0.25 + 0.02);
+            gain.gain.linearRampToValueAtTime(0, now + idx * 0.25 + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.25);
+            osc.stop(now + idx * 0.25 + 0.23);
+            alarmOscillators.push({ osc, ctx });
+          });
+        }
+
+        beepCycle();
+        // Lặp lại mỗi 0.7s
+        const interval = setInterval(() => {
+          if (
+            !document
+              .getElementById("alert-overlay")
+              .classList.contains("active")
+          ) {
+            clearInterval(interval);
+            ctx.close();
+            return;
+          }
+          beepCycle();
+        }, 700);
+
+        alarmOscillators.push({ interval, ctx });
+      }
+
+      function stopAlarm() {
+        alarmOscillators.forEach((item) => {
+          try {
+            if (item.osc) item.osc.stop();
+          } catch (e) {}
+          try {
+            if (item.interval) clearInterval(item.interval);
+          } catch (e) {}
+          try {
+            if (item.ctx) item.ctx.close();
+          } catch (e) {}
+        });
+        alarmOscillators = [];
+      }
+
+      /* ── HIỆN / TẮT ALERT ── */
+      function showAlert(warningRows) {
+        const list = document.getElementById("alert-list");
+        list.innerHTML = warningRows
+          .map((row) => {
+            const { label } = classifyStatus(row);
+            return `
+            <div class="alert-list-item">
+              <span class="pid">${row.mabenhnhan ?? "—"}</span>
+              <span>${row.nhiptim ?? "—"} bpm &nbsp;|&nbsp; SpO₂ ${row.nongdooxy ?? "—"}%</span>
+              <span class="status-tag">${label}</span>
+            </div>`;
+          })
+          .join("");
+        document.getElementById("alert-overlay").classList.add("active");
+        startAlarm();
+      }
+
+      function dismissAlert() {
+        document.getElementById("alert-overlay").classList.remove("active");
+        stopAlarm();
+        alertDismissed = true;
+      }
+
+      /* ── CHECK & TRIGGER ALERT ── */
+      function checkAlerts(data) {
+        if (alertDismissed) return; // chờ lần load tiếp theo
+        const warned = data.filter((r) => {
+          const { cls } = classifyStatus(r);
+          return cls === "warning" || cls === "danger" || cls === "critical";
+        });
+        if (warned.length > 0) showAlert(warned);
+      }
 
       /**
        * Ma trận phân loại theo bảng Nhịp tim × SpO₂:
@@ -661,7 +930,7 @@
                   <div class="bar"><div class="bar-fill" style="width:${spo2}%;background:${spo2Color(spo2)}"></div></div>
                 </div>
               </td>
-              <td><span class="badge ${cls}">${label}</span></td>
+              <td><span class="badge ${cls}">${row.trangthai ?? label}</span></td>
             </tr>`;
           })
           .join("");
@@ -690,6 +959,7 @@
       async function loadData() {
         const btn = document.getElementById("refresh-btn");
         btn.disabled = true;
+        alertDismissed = false; // reset mỗi lần làm mới
 
         document.getElementById("table-body").innerHTML =
           `<tr class="state-row"><td colspan="5"><div class="spinner"></div><br>Đang tải dữ liệu...</td></tr>`;
@@ -700,9 +970,9 @@
           );
           allData = await res.json();
           renderTable(allData);
-
           updateSummary(allData);
           updateTimestamp();
+          checkAlerts(allData);
         } catch (e) {
           document.getElementById("table-body").innerHTML =
             `<tr class="state-row"><td colspan="5">⚠️ Không thể kết nối tới máy chủ. Vui lòng thử lại.</td></tr>`;
