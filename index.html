@@ -125,11 +125,10 @@
       /* ── SUMMARY CARDS ── */
       .summary-row {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 16px;
         margin-bottom: 32px;
       }
-
       .stat-card {
         background: var(--white);
         border-radius: 12px;
@@ -140,7 +139,6 @@
         gap: 6px;
         box-shadow: 0 2px 10px rgba(43, 95, 142, 0.06);
       }
-
       .stat-card .label {
         font-size: 0.72rem;
         font-weight: 600;
@@ -148,7 +146,6 @@
         letter-spacing: 0.08em;
         color: var(--muted);
       }
-
       .stat-card .value {
         font-size: 1.9rem;
         font-weight: 700;
@@ -156,7 +153,6 @@
         font-family: "DM Mono", monospace;
         line-height: 1;
       }
-
       .stat-card.danger .value {
         color: var(--danger);
       }
@@ -166,7 +162,6 @@
       .stat-card.ok .value {
         color: var(--ok);
       }
-
       .stat-card .sub {
         font-size: 0.75rem;
         color: var(--muted);
@@ -487,13 +482,8 @@
 
     <!-- MAIN -->
     <main>
-      <!-- Summary row -->
+      <!-- Summary row (3 cards, không có tổng bệnh nhân) -->
       <div class="summary-row" id="summary-row">
-        <div class="stat-card">
-          <div class="label">Tổng bệnh nhân</div>
-          <div class="value" id="s-total">—</div>
-          <div class="sub">đang theo dõi</div>
-        </div>
         <div class="stat-card ok">
           <div class="label">Bình thường</div>
           <div class="value" id="s-ok">—</div>
@@ -660,7 +650,6 @@
       }
 
       function updateSummary(data) {
-        document.getElementById("s-total").textContent = data.length;
         const ok = data.filter((r) => classifyStatus(r) === "ok").length;
         const warn = data.filter((r) => classifyStatus(r) === "warning").length;
         const danger = data.filter(
@@ -695,6 +684,7 @@
           );
           allData = await res.json();
           renderTable(allData);
+
           updateSummary(allData);
           updateTimestamp();
         } catch (e) {
