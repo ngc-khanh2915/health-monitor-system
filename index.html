@@ -367,6 +367,12 @@
         background: #fdeaea;
         color: #c0392b;
       }
+      .badge.critical {
+        background: #3d0000;
+        color: #ff6b6b;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
       .badge.unknown {
         background: #f0f0f0;
         color: #888;
@@ -566,39 +572,51 @@
     <script>
       let allData = [];
 
+      /**
+       * Ma trận phân loại theo bảng Nhịp tim × SpO₂:
+       *
+       *                  SpO2 Thấp(<90)   SpO2 TB(90-94)    SpO2 BT(95-100)
+       * Cao (>100 bpm)   NGUY HIỂM        CẢNH BÁO          AN TOÀN
+       * BT  (60-100)     NGUY HIỂM        CẢNH BÁO          AN TOÀN
+       * Thấp (<60 bpm)   CỰC KỲ NGUY HIỂM NGUY HIỂM         CẢNH BÁO
+       */
       function classifyStatus(row) {
-        const s = (row.trangthai || "").toLowerCase();
-        if (
-          s.includes("nguy") ||
-          s.includes("khẩn") ||
-          s.includes("nguy hiểm") ||
-          s.includes("critical")
-        )
-          return "danger";
-        if (
-          s.includes("cảnh báo") ||
-          s.includes("bất thường") ||
-          s.includes("warning") ||
-          s.includes("theo dõi")
-        )
-          return "warning";
-        if (
-          s.includes("bình thường") ||
-          s.includes("ổn") ||
-          s.includes("normal") ||
-          s.includes("ok")
-        )
-          return "ok";
-        return "unknown";
+        const bpm = parseFloat(row.nhiptim) || 0;
+        const spo2 = parseFloat(row.nongdooxy) || 0;
+
+        // Nhịp tim
+        const heartHigh = bpm > 100;
+        const heartNormal = bpm >= 60 && bpm <= 100;
+        const heartLow = bpm < 60 && bpm > 0;
+
+        // SpO2
+        const spo2Low = spo2 > 0 && spo2 < 90;
+        const spo2Medium = spo2 >= 90 && spo2 < 95;
+        const spo2Normal = spo2 >= 95;
+
+        if (heartLow && spo2Low)
+          return { cls: "critical", label: "Cực kỳ nguy hiểm" };
+        if (heartLow && spo2Medium)
+          return { cls: "danger", label: "Nguy hiểm" };
+        if (heartLow && spo2Normal)
+          return { cls: "warning", label: "Cảnh báo (Nhịp tim chậm)" };
+
+        if ((heartHigh || heartNormal) && spo2Low)
+          return { cls: "danger", label: "Nguy hiểm" };
+        if ((heartHigh || heartNormal) && spo2Medium)
+          return { cls: "warning", label: "Cảnh báo" };
+        if (heartHigh && spo2Normal)
+          return { cls: "ok", label: "An toàn (Đang vận động)" };
+        if (heartNormal && spo2Normal)
+          return { cls: "ok", label: "An toàn (Nghỉ ngơi)" };
+
+        return { cls: "unknown", label: "Không đủ dữ liệu" };
       }
 
-      function badgeLabel(cls) {
-        return {
-          ok: "Bình thường",
-          warning: "Cần theo dõi",
-          danger: "Khẩn cấp",
-          unknown: "Không rõ",
-        }[cls];
+      // Trả về cls cho summary cards
+      function getStatusCls(row) {
+        const s = classifyStatus(row);
+        return s.cls === "critical" ? "danger" : s.cls;
       }
 
       function heartBarWidth(bpm) {
@@ -622,7 +640,7 @@
 
         tbody.innerHTML = data
           .map((row, i) => {
-            const status = classifyStatus(row);
+            const { cls, label } = classifyStatus(row);
             const bpm = parseFloat(row.nhiptim) || 0;
             const spo2 = parseFloat(row.nongdooxy) || 0;
             const barW = heartBarWidth(bpm);
@@ -643,18 +661,16 @@
                   <div class="bar"><div class="bar-fill" style="width:${spo2}%;background:${spo2Color(spo2)}"></div></div>
                 </div>
               </td>
-              <td><span class="badge ${status}">${row.trangthai ?? badgeLabel(status)}</span></td>
+              <td><span class="badge ${cls}">${label}</span></td>
             </tr>`;
           })
           .join("");
       }
 
       function updateSummary(data) {
-        const ok = data.filter((r) => classifyStatus(r) === "ok").length;
-        const warn = data.filter((r) => classifyStatus(r) === "warning").length;
-        const danger = data.filter(
-          (r) => classifyStatus(r) === "danger",
-        ).length;
+        const ok = data.filter((r) => getStatusCls(r) === "ok").length;
+        const warn = data.filter((r) => getStatusCls(r) === "warning").length;
+        const danger = data.filter((r) => getStatusCls(r) === "danger").length;
         document.getElementById("s-ok").textContent = ok;
         document.getElementById("s-warn").textContent = warn;
         document.getElementById("s-danger").textContent = danger;
