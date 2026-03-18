@@ -2,53 +2,730 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <title>Health Monitor</title>
+    <title>Health Monitor — Dữ liệu sinh tồn</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <style>
-      body {
-        font-family: Arial;
-        background: #f5f5f5;
-        padding: 40px;
+      :root {
+        --navy: #2b5f8e;
+        --sky: #85c8ee;
+        --green: #5ab52a;
+        --mint: #ceecd8;
+        --white: #ffffff;
+        --bg: #f0f7f4;
+        --text: #1a2e1e;
+        --muted: #6b8f7a;
+        --border: #d0e8da;
+        --danger: #e05252;
+        --warn: #e8a930;
+        --ok: var(--green);
       }
 
-      .card {
-        background: white;
-        padding: 15px;
-        margin-bottom: 15px;
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Sora", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
+
+      /* ── HEADER ── */
+      header {
+        background: var(--navy);
+        color: var(--white);
+        padding: 0 40px;
+        height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 20px rgba(43, 95, 142, 0.25);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      header .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      header .brand svg {
+        width: 32px;
+        height: 32px;
+        color: var(--sky);
+      }
+
+      header h1 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        color: var(--white);
+      }
+
+      header h1 span {
+        color: var(--sky);
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .live-dot {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.78rem;
+        color: var(--mint);
+        font-family: "DM Mono", monospace;
+      }
+
+      .live-dot::before {
+        content: "";
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: var(--green);
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(90, 181, 42, 0.6);
+        animation: pulse 1.8s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(90, 181, 42, 0.6);
+        }
+        70% {
+          box-shadow: 0 0 0 8px rgba(90, 181, 42, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(90, 181, 42, 0);
+        }
+      }
+
+      /* ── MAIN LAYOUT ── */
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 32px 40px 60px;
+      }
+
+      /* ── SUMMARY CARDS ── */
+      .summary-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+
+      .stat-card {
+        background: var(--white);
+        border-radius: 12px;
+        padding: 18px 20px;
+        border: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        box-shadow: 0 2px 10px rgba(43, 95, 142, 0.06);
+      }
+
+      .stat-card .label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+
+      .stat-card .value {
+        font-size: 1.9rem;
+        font-weight: 700;
+        color: var(--navy);
+        font-family: "DM Mono", monospace;
+        line-height: 1;
+      }
+
+      .stat-card.danger .value {
+        color: var(--danger);
+      }
+      .stat-card.warn .value {
+        color: var(--warn);
+      }
+      .stat-card.ok .value {
+        color: var(--ok);
+      }
+
+      .stat-card .sub {
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      /* ── TABLE SECTION ── */
+      .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+
+      .section-header h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--navy);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .section-header h2::before {
+        content: "";
+        display: inline-block;
+        width: 4px;
+        height: 20px;
+        background: var(--green);
+        border-radius: 2px;
+      }
+
+      .search-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--white);
+        border: 1px solid var(--border);
         border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 6px 14px;
+        font-size: 0.83rem;
+        color: var(--muted);
+      }
+
+      .search-box input {
+        border: none;
+        outline: none;
+        font-family: "Sora", sans-serif;
+        font-size: 0.83rem;
+        color: var(--text);
+        background: transparent;
+        width: 180px;
+      }
+
+      /* ── SCROLLABLE TABLE WRAPPER ── */
+      .table-wrapper {
+        background: var(--white);
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        box-shadow: 0 4px 20px rgba(43, 95, 142, 0.07);
+        overflow: hidden;
+      }
+
+      .table-scroll {
+        max-height: 480px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: var(--sky) var(--mint);
+      }
+
+      .table-scroll::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .table-scroll::-webkit-scrollbar-track {
+        background: var(--mint);
+        border-radius: 0 14px 14px 0;
+      }
+
+      .table-scroll::-webkit-scrollbar-thumb {
+        background: var(--sky);
+        border-radius: 4px;
+        border: 2px solid var(--mint);
+      }
+
+      .table-scroll::-webkit-scrollbar-thumb:hover {
+        background: var(--navy);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+      }
+
+      thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--navy);
+        color: var(--white);
+      }
+
+      thead th {
+        padding: 14px 20px;
+        text-align: left;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      thead th:first-child {
+        border-radius: 0;
+      }
+
+      tbody tr {
+        border-bottom: 1px solid var(--border);
+        transition: background 0.15s;
+      }
+
+      tbody tr:last-child {
+        border-bottom: none;
+      }
+
+      tbody tr:hover {
+        background: #f5fcf7;
+      }
+
+      tbody td {
+        padding: 13px 20px;
+        vertical-align: middle;
+        color: var(--text);
+      }
+
+      /* patient id */
+      .patient-id {
+        font-family: "DM Mono", monospace;
+        font-size: 0.82rem;
+        color: var(--navy);
+        font-weight: 500;
+        background: #e8f2fc;
+        padding: 3px 8px;
+        border-radius: 5px;
+        display: inline-block;
+      }
+
+      /* vitals */
+      .vital {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "DM Mono", monospace;
+        font-size: 0.88rem;
+        font-weight: 500;
+      }
+
+      .vital .bar {
+        width: 52px;
+        height: 4px;
+        background: var(--border);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .vital .bar-fill {
+        height: 100%;
+        border-radius: 2px;
+        background: var(--sky);
+        transition: width 0.5s ease;
+      }
+
+      /* status badge */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .badge::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: 0.8;
+      }
+
+      .badge.ok {
+        background: #e8f8ec;
+        color: #2d8a3e;
+      }
+      .badge.warning {
+        background: #fff4e0;
+        color: #b97a00;
+      }
+      .badge.danger {
+        background: #fdeaea;
+        color: #c0392b;
+      }
+      .badge.unknown {
+        background: #f0f0f0;
+        color: #888;
+      }
+
+      /* ── EMPTY / LOADING ── */
+      .state-row td {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .spinner {
+        display: inline-block;
+        width: 28px;
+        height: 28px;
+        border: 3px solid var(--border);
+        border-top-color: var(--navy);
+        border-radius: 50%;
+        animation: spin 0.75s linear infinite;
+        margin-bottom: 10px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── FOOTER ── */
+      .footer-bar {
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: var(--muted);
+        padding: 0 4px;
+      }
+
+      #last-updated {
+        font-family: "DM Mono", monospace;
+      }
+
+      .refresh-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--navy);
+        color: var(--white);
+        border: none;
+        border-radius: 8px;
+        padding: 7px 16px;
+        font-family: "Sora", sans-serif;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background 0.2s,
+          transform 0.1s;
+      }
+
+      .refresh-btn:hover {
+        background: #1e4a72;
+      }
+      .refresh-btn:active {
+        transform: scale(0.97);
+      }
+      .refresh-btn svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* ── RESPONSIVE ── */
+      @media (max-width: 860px) {
+        .summary-row {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        main {
+          padding: 24px 20px 50px;
+        }
+        header {
+          padding: 0 20px;
+        }
+        .vital .bar {
+          display: none;
+        }
       }
     </style>
   </head>
 
   <body>
-    <h1>Dữ liệu sinh tồn</h1>
+    <!-- HEADER -->
+    <header>
+      <div class="brand">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+        <h1>Health<span>Monitor</span></h1>
+      </div>
+      <div class="header-right">
+        <div class="live-dot">Đang theo dõi trực tiếp</div>
+      </div>
+    </header>
 
-    <div id="data"></div>
+    <!-- MAIN -->
+    <main>
+      <!-- Summary row -->
+      <div class="summary-row" id="summary-row">
+        <div class="stat-card">
+          <div class="label">Tổng bệnh nhân</div>
+          <div class="value" id="s-total">—</div>
+          <div class="sub">đang theo dõi</div>
+        </div>
+        <div class="stat-card ok">
+          <div class="label">Bình thường</div>
+          <div class="value" id="s-ok">—</div>
+          <div class="sub">chỉ số ổn định</div>
+        </div>
+        <div class="stat-card warn">
+          <div class="label">Cần theo dõi</div>
+          <div class="value" id="s-warn">—</div>
+          <div class="sub">cảnh báo nhẹ</div>
+        </div>
+        <div class="stat-card danger">
+          <div class="label">Khẩn cấp</div>
+          <div class="value" id="s-danger">—</div>
+          <div class="sub">cần can thiệp</div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="section-header">
+        <h2>Bảng dữ liệu sinh tồn</h2>
+        <div class="search-box">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input id="search-input" type="text" placeholder="Tìm bệnh nhân..." />
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Mã bệnh nhân</th>
+                <th>Nhịp tim (bpm)</th>
+                <th>SpO₂ (%)</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr class="state-row">
+                <td colspan="5">
+                  <div class="spinner"></div>
+                  <br />Đang tải dữ liệu...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="footer-bar">
+        <span id="last-updated">—</span>
+        <button class="refresh-btn" id="refresh-btn" onclick="loadData()">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="1 4 1 10 7 10" />
+            <path d="M3.51 15a9 9 0 1 0 .49-4.1" />
+          </svg>
+          Làm mới
+        </button>
+      </div>
+    </main>
 
     <script>
-      fetch("https://health-monitor-system-pni3.onrender.com/sinh-ton")
-        .then((response) => response.json())
-        .then((data) => {
-          const container = document.getElementById("data");
+      let allData = [];
 
-          data.forEach((row) => {
-            const div = document.createElement("div");
-            div.className = "card";
+      function classifyStatus(row) {
+        const s = (row.trangthai || "").toLowerCase();
+        if (
+          s.includes("nguy") ||
+          s.includes("khẩn") ||
+          s.includes("nguy hiểm") ||
+          s.includes("critical")
+        )
+          return "danger";
+        if (
+          s.includes("cảnh báo") ||
+          s.includes("bất thường") ||
+          s.includes("warning") ||
+          s.includes("theo dõi")
+        )
+          return "warning";
+        if (
+          s.includes("bình thường") ||
+          s.includes("ổn") ||
+          s.includes("normal") ||
+          s.includes("ok")
+        )
+          return "ok";
+        return "unknown";
+      }
 
-            div.innerHTML = `
-            <p>Bệnh nhân: ${row.mabenhnhan}</p>
-            <p>Nhịp tim: ${row.nhiptim}</p>
-            <p>SpO2: ${row.nongdooxy}</p>
-            <p>Trạng thái: ${row.trangthai}</p>
-          `;
+      function badgeLabel(cls) {
+        return {
+          ok: "Bình thường",
+          warning: "Cần theo dõi",
+          danger: "Khẩn cấp",
+          unknown: "Không rõ",
+        }[cls];
+      }
 
-            container.appendChild(div);
+      function heartBarWidth(bpm) {
+        // normal range 60–100; scale 0–160 → 0–100%
+        const pct = Math.min(100, Math.max(0, ((bpm - 40) / 120) * 100));
+        return pct;
+      }
+
+      function spo2Color(val) {
+        if (val >= 95) return "var(--green)";
+        if (val >= 90) return "var(--warn)";
+        return "var(--danger)";
+      }
+
+      function renderTable(data) {
+        const tbody = document.getElementById("table-body");
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr class="state-row"><td colspan="5">Không có dữ liệu.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data
+          .map((row, i) => {
+            const status = classifyStatus(row);
+            const bpm = parseFloat(row.nhiptim) || 0;
+            const spo2 = parseFloat(row.nongdooxy) || 0;
+            const barW = heartBarWidth(bpm);
+
+            return `
+            <tr>
+              <td style="color:var(--muted);font-size:0.78rem;font-family:'DM Mono',monospace;">${String(i + 1).padStart(2, "0")}</td>
+              <td><span class="patient-id">${row.mabenhnhan ?? "—"}</span></td>
+              <td>
+                <div class="vital">
+                  <span>${bpm > 0 ? bpm : "—"}</span>
+                  <div class="bar"><div class="bar-fill" style="width:${barW}%;background:var(--sky)"></div></div>
+                </div>
+              </td>
+              <td>
+                <div class="vital">
+                  <span style="color:${spo2Color(spo2)}">${spo2 > 0 ? spo2 + "%" : "—"}</span>
+                  <div class="bar"><div class="bar-fill" style="width:${spo2}%;background:${spo2Color(spo2)}"></div></div>
+                </div>
+              </td>
+              <td><span class="badge ${status}">${row.trangthai ?? badgeLabel(status)}</span></td>
+            </tr>`;
+          })
+          .join("");
+      }
+
+      function updateSummary(data) {
+        document.getElementById("s-total").textContent = data.length;
+        const ok = data.filter((r) => classifyStatus(r) === "ok").length;
+        const warn = data.filter((r) => classifyStatus(r) === "warning").length;
+        const danger = data.filter(
+          (r) => classifyStatus(r) === "danger",
+        ).length;
+        document.getElementById("s-ok").textContent = ok;
+        document.getElementById("s-warn").textContent = warn;
+        document.getElementById("s-danger").textContent = danger;
+      }
+
+      function updateTimestamp() {
+        const now = new Date();
+        document.getElementById("last-updated").textContent =
+          "Cập nhật lúc " +
+          now.toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
           });
-        })
-        .catch((error) => {
-          console.error("Lỗi khi fetch dữ liệu:", error);
+      }
+
+      async function loadData() {
+        const btn = document.getElementById("refresh-btn");
+        btn.disabled = true;
+
+        document.getElementById("table-body").innerHTML =
+          `<tr class="state-row"><td colspan="5"><div class="spinner"></div><br>Đang tải dữ liệu...</td></tr>`;
+
+        try {
+          const res = await fetch(
+            "https://health-monitor-system-pni3.onrender.com/sinh-ton",
+          );
+          allData = await res.json();
+          renderTable(allData);
+          updateSummary(allData);
+          updateTimestamp();
+        } catch (e) {
+          document.getElementById("table-body").innerHTML =
+            `<tr class="state-row"><td colspan="5">⚠️ Không thể kết nối tới máy chủ. Vui lòng thử lại.</td></tr>`;
+          console.error(e);
+        }
+
+        btn.disabled = false;
+      }
+
+      // Search filter
+      document
+        .getElementById("search-input")
+        .addEventListener("input", function () {
+          const q = this.value.toLowerCase().trim();
+          if (!q) {
+            renderTable(allData);
+            return;
+          }
+          const filtered = allData.filter(
+            (r) =>
+              (r.mabenhnhan || "").toLowerCase().includes(q) ||
+              (r.trangthai || "").toLowerCase().includes(q),
+          );
+          renderTable(filtered);
         });
+
+      // Auto-refresh every 30s
+      loadData();
+      setInterval(loadData, 30000);
     </script>
   </body>
 </html>
