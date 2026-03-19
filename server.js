@@ -19,9 +19,9 @@ app.options("*", cors()); // Handle CORS preflight requests
 app.use(express.json());
 
 // Supabase config
-const supabaseUrl = "https://bducrozjrbdkueytgzsv.supabase.co";
+const supabaseUrl = "https://ndjcfvuywhjfikggpwas.supabase.co";
 const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkdWNyb3pqcmJka3VleXRnenN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzgwNDYsImV4cCI6MjA4ODgxNDA0Nn0.zw-G1eX0Wh-MIJUNgc2ow2s_CRsMIDQQA9sSGPvfniM";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5kamNmdnV5d2hqZmlrZ2dwd2FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MzY2MTMsImV4cCI6MjA4OTQxMjYxM30.oY1vZa0XUpAMmEdgsavqoO4Q2xSO-t6S5bKRFzSTTxo";
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
