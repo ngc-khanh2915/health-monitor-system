@@ -182,14 +182,14 @@
         gap: 0;
         background: var(--white);
         border: 1.5px solid var(--border);
-        border-radius: 10px;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(43, 95, 142, 0.06);
+        box-shadow: 0 2px 8px rgba(43, 95, 142, 0.07);
       }
 
       .day-picker-nav {
-        width: 34px;
-        height: 44px;
+        width: 36px;
+        height: 90px;
         border: none;
         background: transparent;
         cursor: pointer;
@@ -200,7 +200,6 @@
         transition: background 0.15s;
         flex-shrink: 0;
       }
-
       .day-picker-nav:hover:not(:disabled) {
         background: var(--mint);
       }
@@ -220,12 +219,9 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        padding: 6px 16px;
         border-right: 1px solid var(--border);
-        min-width: 64px;
+        min-width: 72px;
       }
-
       .day-unit:last-child {
         border-right: none;
       }
@@ -236,19 +232,53 @@
         text-transform: uppercase;
         letter-spacing: 0.1em;
         color: var(--muted);
-        margin-bottom: 2px;
+        padding: 6px 0 2px;
       }
 
       .day-unit-value {
         font-family: "DM Mono", monospace;
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         font-weight: 700;
         color: var(--navy);
         line-height: 1;
+        padding: 4px 0;
+        min-width: 48px;
+        text-align: center;
       }
-
       .day-unit-value.today-val {
         color: var(--green);
+      }
+
+      .day-unit-btns {
+        display: flex;
+        gap: 4px;
+        padding: 5px 0 6px;
+      }
+
+      .unit-btn {
+        width: 24px;
+        height: 20px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        background: var(--bg);
+        color: var(--navy);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        transition:
+          background 0.12s,
+          border-color 0.12s;
+        line-height: 1;
+      }
+      .unit-btn:hover {
+        background: var(--navy);
+        color: var(--white);
+        border-color: var(--navy);
+      }
+      .unit-btn:active {
+        transform: scale(0.92);
       }
 
       .day-today-badge {
@@ -261,14 +291,12 @@
         font-size: 0.72rem;
         font-weight: 700;
         letter-spacing: 0.04em;
-        margin-left: 4px;
       }
 
       .day-count-badge {
         font-size: 0.75rem;
         color: var(--muted);
         font-family: "DM Mono", monospace;
-        margin-left: 4px;
       }
 
       /* ── TABLE SECTION ── */
@@ -774,6 +802,7 @@
       <!-- Day navigation -->
       <div class="day-nav" id="day-nav">
         <div class="day-picker">
+          <!-- Nút lùi 1 ngày -->
           <button
             class="day-picker-nav"
             id="btn-prev"
@@ -791,20 +820,74 @@
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </button>
-          <div class="day-picker-display" id="day-picker-display">
+
+          <div class="day-picker-display">
+            <!-- NGÀY -->
             <div class="day-unit">
               <div class="day-unit-label">Ngày</div>
               <div class="day-unit-value" id="disp-day">—</div>
+              <div class="day-unit-btns">
+                <button
+                  class="unit-btn"
+                  onclick="adjustUnit('day', 1)"
+                  title="Tăng"
+                >
+                  ▲
+                </button>
+                <button
+                  class="unit-btn"
+                  onclick="adjustUnit('day', -1)"
+                  title="Giảm"
+                >
+                  ▼
+                </button>
+              </div>
             </div>
+            <!-- THÁNG -->
             <div class="day-unit">
               <div class="day-unit-label">Tháng</div>
               <div class="day-unit-value" id="disp-month">—</div>
+              <div class="day-unit-btns">
+                <button
+                  class="unit-btn"
+                  onclick="adjustUnit('month', 1)"
+                  title="Tăng"
+                >
+                  ▲
+                </button>
+                <button
+                  class="unit-btn"
+                  onclick="adjustUnit('month', -1)"
+                  title="Giảm"
+                >
+                  ▼
+                </button>
+              </div>
             </div>
+            <!-- NĂM -->
             <div class="day-unit">
               <div class="day-unit-label">Năm</div>
               <div class="day-unit-value" id="disp-year">—</div>
+              <div class="day-unit-btns">
+                <button
+                  class="unit-btn"
+                  onclick="adjustUnit('year', 1)"
+                  title="Tăng"
+                >
+                  ▲
+                </button>
+                <button
+                  class="unit-btn"
+                  onclick="adjustUnit('year', -1)"
+                  title="Giảm"
+                >
+                  ▼
+                </button>
+              </div>
             </div>
           </div>
+
+          <!-- Nút tiến 1 ngày -->
           <button
             class="day-picker-nav"
             id="btn-next"
@@ -1136,7 +1219,6 @@
         document.getElementById("disp-month").textContent = m || "—";
         document.getElementById("disp-year").textContent = y || "—";
 
-        // Tô màu xanh nếu là hôm nay
         ["disp-day", "disp-month", "disp-year"].forEach((id) => {
           document.getElementById(id).className =
             "day-unit-value" + (isToday ? " today-val" : "");
@@ -1147,11 +1229,43 @@
           : "none";
         document.getElementById("day-count-badge").textContent = count
           ? `${count} bản ghi`
-          : "";
+          : "Không có dữ liệu";
 
         document.getElementById("btn-prev").disabled =
           currentDayIdx >= dayKeys.length - 1;
         document.getElementById("btn-next").disabled = currentDayIdx <= 0;
+      }
+
+      // Điều chỉnh ngày/tháng/năm độc lập, tìm ngày gần nhất có dữ liệu
+      function adjustUnit(unit, delta) {
+        const currentKey = dayKeys[currentDayIdx] || "";
+        if (!currentKey || currentKey === "unknown") return;
+
+        let [y, m, d] = currentKey.split("-").map(Number);
+
+        if (unit === "day") d += delta;
+        if (unit === "month") m += delta;
+        if (unit === "year") y += delta;
+
+        // Normalize: xử lý tràn tháng/ngày
+        const ref = new Date(y, m - 1, d);
+        const targetKey = toDateKey(ref.toISOString());
+
+        // Tìm key khớp chính xác
+        const exactIdx = dayKeys.indexOf(targetKey);
+        if (exactIdx !== -1) {
+          selectDay(exactIdx);
+          return;
+        }
+
+        // Không có dữ liệu ngày đó → tìm ngày gần nhất
+        const sorted = [...dayKeys].sort((a, b) => {
+          const da = Math.abs(new Date(a) - new Date(targetKey));
+          const db = Math.abs(new Date(b) - new Date(targetKey));
+          return da - db;
+        });
+        const nearestIdx = dayKeys.indexOf(sorted[0]);
+        selectDay(nearestIdx);
       }
 
       function selectDay(idx) {
