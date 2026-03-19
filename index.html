@@ -167,6 +167,96 @@
         color: var(--muted);
       }
 
+      /* ── DAY NAVIGATION ── */
+      .day-nav {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .day-nav-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-right: 4px;
+      }
+
+      .day-tabs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        flex: 1;
+      }
+
+      .day-tab {
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 1.5px solid var(--border);
+        background: var(--white);
+        font-family: "DM Mono", monospace;
+        font-size: 0.78rem;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+
+      .day-tab:hover {
+        border-color: var(--sky);
+        color: var(--navy);
+      }
+
+      .day-tab.active {
+        background: var(--navy);
+        border-color: var(--navy);
+        color: var(--white);
+        font-weight: 600;
+      }
+
+      .day-tab.today {
+        border-color: var(--green);
+        color: var(--green);
+      }
+
+      .day-tab.today.active {
+        background: var(--green);
+        border-color: var(--green);
+        color: var(--white);
+      }
+
+      .day-nav-arrows {
+        display: flex;
+        gap: 4px;
+      }
+
+      .nav-arrow {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border);
+        background: var(--white);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--navy);
+        transition: all 0.15s;
+      }
+
+      .nav-arrow:hover:not(:disabled) {
+        background: var(--navy);
+        color: var(--white);
+        border-color: var(--navy);
+      }
+      .nav-arrow:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
       /* ── TABLE SECTION ── */
       .section-header {
         display: flex;
@@ -667,6 +757,48 @@
         </div>
       </div>
 
+      <!-- Day navigation -->
+      <div class="day-nav" id="day-nav">
+        <span class="day-nav-label" id="day-nav-label">Ngày:</span>
+        <div class="day-nav-arrows">
+          <button
+            class="nav-arrow"
+            id="btn-prev"
+            onclick="shiftDay(-1)"
+            title="Ngày trước"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <button
+            class="nav-arrow"
+            id="btn-next"
+            onclick="shiftDay(1)"
+            title="Ngày sau"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+        <div class="day-tabs" id="day-tabs"></div>
+      </div>
+
       <!-- Table -->
       <div class="section-header">
         <h2>Bảng dữ liệu sinh tồn</h2>
@@ -696,6 +828,7 @@
                 <th>Nhịp tim (bpm)</th>
                 <th>SpO₂ (%)</th>
                 <th>Trạng thái</th>
+                <th>Thời gian đo</th>
               </tr>
             </thead>
             <tbody id="table-body">
@@ -900,10 +1033,104 @@
         return "var(--danger)";
       }
 
+      function formatDateTime(ts) {
+        if (!ts) return "—";
+        const d = new Date(ts);
+        if (isNaN(d)) return ts;
+        return d.toLocaleString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+      }
+
+      function toDateKey(ts) {
+        if (!ts) return "unknown";
+        const d = new Date(ts);
+        if (isNaN(d)) return "unknown";
+        // YYYY-MM-DD theo giờ local
+        return (
+          d.getFullYear() +
+          "-" +
+          String(d.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(d.getDate()).padStart(2, "0")
+        );
+      }
+
+      function formatDateLabel(key) {
+        if (key === "unknown") return "Không rõ ngày";
+        const [y, m, d] = key.split("-");
+        const todayKey = toDateKey(new Date().toISOString());
+        if (key === todayKey) return `Hôm nay — ${d}/${m}/${y}`;
+        return `${d}/${m}/${y}`;
+      }
+
+      /* ── GROUP DATA BY DAY ── */
+      let dayKeys = []; // mảng các key ngày đã sắp xếp giảm dần
+      let currentDayIdx = 0; // index trong dayKeys đang xem
+
+      function groupByDay(data) {
+        const map = {};
+        data.forEach((row) => {
+          const key = toDateKey(row.thoigiando);
+          if (!map[key]) map[key] = [];
+          map[key].push(row);
+        });
+        // Sắp xếp mới nhất lên đầu
+        dayKeys = Object.keys(map).sort((a, b) => b.localeCompare(a));
+        return map;
+      }
+
+      let dayMap = {};
+
+      function renderDayTabs() {
+        const container = document.getElementById("day-tabs");
+        const todayKey = toDateKey(new Date().toISOString());
+        container.innerHTML = dayKeys
+          .map(
+            (key, idx) => `
+          <button class="day-tab ${key === todayKey ? "today" : ""} ${idx === currentDayIdx ? "active" : ""}"
+                  onclick="selectDay(${idx})">
+            ${formatDateLabel(key)}
+          </button>`,
+          )
+          .join("");
+
+        document.getElementById("btn-prev").disabled =
+          currentDayIdx >= dayKeys.length - 1;
+        document.getElementById("btn-next").disabled = currentDayIdx <= 0;
+
+        // Cập nhật label ngày đang xem
+        const currentKey = dayKeys[currentDayIdx];
+        const [y, m, d] = (currentKey || "").split("-");
+        document.getElementById("day-nav-label").textContent =
+          currentKey && currentKey !== "unknown"
+            ? `Ngày ${d}/${m}/${y}:`
+            : "Ngày:";
+      }
+
+      function selectDay(idx) {
+        currentDayIdx = idx;
+        renderDayTabs();
+        const dayData = dayMap[dayKeys[idx]] || [];
+        renderTable(dayData);
+        updateSummary(dayData);
+      }
+
+      function shiftDay(dir) {
+        const next = currentDayIdx - dir; // prev = idx+1 (ngày cũ hơn), next = idx-1 (ngày mới hơn)
+        if (next < 0 || next >= dayKeys.length) return;
+        selectDay(next);
+      }
+
       function renderTable(data) {
         const tbody = document.getElementById("table-body");
         if (!data || data.length === 0) {
-          tbody.innerHTML = `<tr class="state-row"><td colspan="5">Không có dữ liệu.</td></tr>`;
+          tbody.innerHTML = `<tr class="state-row"><td colspan="6">Không có dữ liệu.</td></tr>`;
           return;
         }
 
@@ -931,6 +1158,9 @@
                 </div>
               </td>
               <td><span class="badge ${cls}">${row.trangthai ?? label}</span></td>
+              <td style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--muted);white-space:nowrap;">
+                ${formatDateTime(row.thoigiando)}
+              </td>
             </tr>`;
           })
           .join("");
@@ -961,36 +1191,44 @@
         btn.disabled = true;
 
         document.getElementById("table-body").innerHTML =
-          `<tr class="state-row"><td colspan="5"><div class="spinner"></div><br>Đang tải dữ liệu...</td></tr>`;
+          `<tr class="state-row"><td colspan="6"><div class="spinner"></div><br>Đang tải dữ liệu...</td></tr>`;
 
         try {
           const res = await fetch(
             "https://health-monitor-system-pni3.onrender.com/sinh-ton",
           );
           allData = await res.json();
-          renderTable(allData);
-          updateSummary(allData);
+
+          // Nhóm theo ngày
+          dayMap = groupByDay(allData);
+          currentDayIdx = 0; // mặc định xem ngày mới nhất
+          renderDayTabs();
+
+          const todayData = dayMap[dayKeys[0]] || [];
+          renderTable(todayData);
+          updateSummary(todayData);
           updateTimestamp();
-          checkAlerts(allData);
+          checkAlerts(todayData);
         } catch (e) {
           document.getElementById("table-body").innerHTML =
-            `<tr class="state-row"><td colspan="5">⚠️ Không thể kết nối tới máy chủ. Vui lòng thử lại.</td></tr>`;
+            `<tr class="state-row"><td colspan="6">⚠️ Không thể kết nối tới máy chủ. Vui lòng thử lại.</td></tr>`;
           console.error(e);
         }
 
         btn.disabled = false;
       }
 
-      // Search filter
+      // Search filter — lọc trên dữ liệu của ngày đang xem
       document
         .getElementById("search-input")
         .addEventListener("input", function () {
           const q = this.value.toLowerCase().trim();
+          const dayData = dayMap[dayKeys[currentDayIdx]] || [];
           if (!q) {
-            renderTable(allData);
+            renderTable(dayData);
             return;
           }
-          const filtered = allData.filter(
+          const filtered = dayData.filter(
             (r) =>
               (r.mabenhnhan || "").toLowerCase().includes(q) ||
               (r.trangthai || "").toLowerCase().includes(q),
