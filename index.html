@@ -167,118 +167,244 @@
         color: var(--muted);
       }
 
-      /* ── DAY NAVIGATION ── */
+      /* ── DATE PICKER ── */
       .day-nav {
         display: flex;
         align-items: center;
         gap: 12px;
         margin-bottom: 20px;
         flex-wrap: wrap;
+        position: relative;
       }
 
-      .day-picker {
+      .datepicker-trigger {
         display: flex;
         align-items: center;
-        gap: 0;
+        gap: 10px;
         background: var(--white);
         border: 1.5px solid var(--border);
-        border-radius: 12px;
-        overflow: hidden;
+        border-radius: 10px;
+        padding: 10px 16px;
+        cursor: pointer;
         box-shadow: 0 2px 8px rgba(43, 95, 142, 0.07);
+        transition: border-color 0.15s;
+        user-select: none;
+      }
+      .datepicker-trigger:hover {
+        border-color: var(--sky);
+      }
+      .datepicker-trigger.open {
+        border-color: var(--navy);
       }
 
-      .day-picker-nav {
-        width: 36px;
-        height: 90px;
-        border: none;
+      .datepicker-trigger .cal-icon {
+        color: var(--navy);
+        flex-shrink: 0;
+      }
+
+      .datepicker-date {
+        font-family: "DM Mono", monospace;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--navy);
+        letter-spacing: 0.04em;
+      }
+      .datepicker-date.today-val {
+        color: var(--green);
+      }
+
+      .datepicker-chevron {
+        color: var(--muted);
+        transition: transform 0.2s;
+        flex-shrink: 0;
+      }
+      .datepicker-trigger.open .datepicker-chevron {
+        transform: rotate(180deg);
+      }
+
+      /* Calendar popup */
+      .cal-popup {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        z-index: 200;
+        background: var(--white);
+        border: 1.5px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 8px 32px rgba(43, 95, 142, 0.15);
+        padding: 16px;
+        min-width: 280px;
+        animation: calFadeIn 0.15s ease;
+      }
+      .cal-popup.open {
+        display: block;
+      }
+
+      @keyframes calFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .cal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        gap: 6px;
+      }
+
+      .cal-nav-btn {
+        width: 28px;
+        height: 28px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
         background: transparent;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         color: var(--navy);
-        transition: background 0.15s;
+        transition: background 0.12s;
         flex-shrink: 0;
       }
-      .day-picker-nav:hover:not(:disabled) {
+      .cal-nav-btn:hover {
         background: var(--mint);
       }
-      .day-picker-nav:disabled {
-        opacity: 0.25;
-        cursor: not-allowed;
-      }
 
-      .day-picker-display {
+      .cal-month-year {
         display: flex;
-        align-items: stretch;
-        border-left: 1.5px solid var(--border);
-        border-right: 1.5px solid var(--border);
-      }
-
-      .day-unit {
-        display: flex;
-        flex-direction: column;
         align-items: center;
-        border-right: 1px solid var(--border);
-        min-width: 72px;
-      }
-      .day-unit:last-child {
-        border-right: none;
+        gap: 6px;
+        flex: 1;
+        justify-content: center;
       }
 
-      .day-unit-label {
-        font-size: 0.6rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--muted);
-        padding: 6px 0 2px;
-      }
-
-      .day-unit-value {
-        font-family: "DM Mono", monospace;
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--navy);
-        line-height: 1;
-        padding: 4px 0;
-        min-width: 48px;
-        text-align: center;
-      }
-      .day-unit-value.today-val {
-        color: var(--green);
-      }
-
-      .day-unit-btns {
-        display: flex;
-        gap: 4px;
-        padding: 5px 0 6px;
-      }
-
-      .unit-btn {
-        width: 24px;
-        height: 20px;
+      .cal-select {
         border: 1px solid var(--border);
-        border-radius: 5px;
-        background: var(--bg);
+        border-radius: 6px;
+        padding: 3px 6px;
+        font-family: "DM Mono", monospace;
+        font-size: 0.82rem;
+        font-weight: 700;
         color: var(--navy);
+        background: var(--bg);
         cursor: pointer;
+        outline: none;
+      }
+      .cal-select:focus {
+        border-color: var(--navy);
+      }
+
+      .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 3px;
+      }
+
+      .cal-dow {
+        text-align: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 4px 0;
+      }
+
+      .cal-day {
+        aspect-ratio: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.65rem;
+        border-radius: 7px;
+        font-family: "DM Mono", monospace;
+        font-size: 0.78rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1.5px solid transparent;
         transition:
-          background 0.12s,
-          border-color 0.12s;
-        line-height: 1;
+          background 0.1s,
+          border-color 0.1s;
+        position: relative;
       }
-      .unit-btn:hover {
+      .cal-day:hover:not(.empty):not(.selected) {
+        background: var(--mint);
+      }
+      .cal-day.empty {
+        cursor: default;
+      }
+      .cal-day.has-data {
+        font-weight: 700;
+        color: var(--navy);
+      }
+      .cal-day.has-data::after {
+        content: "";
+        position: absolute;
+        bottom: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--sky);
+      }
+      .cal-day.selected {
         background: var(--navy);
         color: var(--white);
         border-color: var(--navy);
       }
-      .unit-btn:active {
-        transform: scale(0.92);
+      .cal-day.selected::after {
+        background: var(--sky);
+      }
+      .cal-day.is-today {
+        border-color: var(--green);
+        color: var(--green);
+        font-weight: 700;
+      }
+      .cal-day.is-today.selected {
+        background: var(--green);
+        border-color: var(--green);
+        color: var(--white);
+      }
+      .cal-day.no-data {
+        color: #ccc;
+        cursor: default;
+      }
+
+      .cal-footer {
+        margin-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 6px;
+      }
+      .cal-today-btn {
+        font-size: 0.75rem;
+        font-family: "Sora", sans-serif;
+        font-weight: 600;
+        color: var(--green);
+        background: #e8f8ec;
+        border: none;
+        border-radius: 6px;
+        padding: 5px 12px;
+        cursor: pointer;
+        transition: background 0.12s;
+      }
+      .cal-today-btn:hover {
+        background: #d0f0da;
+      }
+
+      .day-count-badge {
+        font-size: 0.75rem;
+        color: var(--muted);
+        font-family: "DM Mono", monospace;
       }
 
       .day-today-badge {
@@ -291,12 +417,6 @@
         font-size: 0.72rem;
         font-weight: 700;
         letter-spacing: 0.04em;
-      }
-
-      .day-count-badge {
-        font-size: 0.75rem;
-        color: var(--muted);
-        font-family: "DM Mono", monospace;
       }
 
       /* ── TABLE SECTION ── */
@@ -799,117 +919,98 @@
         </div>
       </div>
 
-      <!-- Day navigation -->
+      <!-- Date Picker -->
       <div class="day-nav" id="day-nav">
-        <div class="day-picker">
-          <!-- Nút lùi 1 ngày -->
-          <button
-            class="day-picker-nav"
-            id="btn-prev"
-            onclick="shiftDay(-1)"
-            title="Ngày trước"
+        <!-- Trigger button -->
+        <div
+          class="datepicker-trigger"
+          id="datepicker-trigger"
+          onclick="toggleCalendar()"
+        >
+          <svg
+            class="cal-icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <span class="datepicker-date" id="datepicker-date">—</span>
+          <svg
+            class="datepicker-chevron"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
 
-          <div class="day-picker-display">
-            <!-- NGÀY -->
-            <div class="day-unit">
-              <div class="day-unit-label">Ngày</div>
-              <div class="day-unit-value" id="disp-day">—</div>
-              <div class="day-unit-btns">
-                <button
-                  class="unit-btn"
-                  onclick="adjustUnit('day', 1)"
-                  title="Tăng"
-                >
-                  ▲
-                </button>
-                <button
-                  class="unit-btn"
-                  onclick="adjustUnit('day', -1)"
-                  title="Giảm"
-                >
-                  ▼
-                </button>
-              </div>
+        <!-- Calendar popup -->
+        <div class="cal-popup" id="cal-popup">
+          <div class="cal-header">
+            <button class="cal-nav-btn" onclick="calShiftMonth(-1)">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <div class="cal-month-year">
+              <select
+                class="cal-select"
+                id="cal-month-sel"
+                onchange="calGoToMonth()"
+              ></select>
+              <select
+                class="cal-select"
+                id="cal-year-sel"
+                onchange="calGoToYear()"
+              ></select>
             </div>
-            <!-- THÁNG -->
-            <div class="day-unit">
-              <div class="day-unit-label">Tháng</div>
-              <div class="day-unit-value" id="disp-month">—</div>
-              <div class="day-unit-btns">
-                <button
-                  class="unit-btn"
-                  onclick="adjustUnit('month', 1)"
-                  title="Tăng"
-                >
-                  ▲
-                </button>
-                <button
-                  class="unit-btn"
-                  onclick="adjustUnit('month', -1)"
-                  title="Giảm"
-                >
-                  ▼
-                </button>
-              </div>
-            </div>
-            <!-- NĂM -->
-            <div class="day-unit">
-              <div class="day-unit-label">Năm</div>
-              <div class="day-unit-value" id="disp-year">—</div>
-              <div class="day-unit-btns">
-                <button
-                  class="unit-btn"
-                  onclick="adjustUnit('year', 1)"
-                  title="Tăng"
-                >
-                  ▲
-                </button>
-                <button
-                  class="unit-btn"
-                  onclick="adjustUnit('year', -1)"
-                  title="Giảm"
-                >
-                  ▼
-                </button>
-              </div>
-            </div>
+            <button class="cal-nav-btn" onclick="calShiftMonth(1)">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
           </div>
 
-          <!-- Nút tiến 1 ngày -->
-          <button
-            class="day-picker-nav"
-            id="btn-next"
-            onclick="shiftDay(1)"
-            title="Ngày sau"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
+          <div class="cal-grid" id="cal-grid"></div>
+
+          <div class="cal-footer">
+            <button class="cal-today-btn" onclick="calGoToday()">
+              ● Hôm nay
+            </button>
+            <span class="day-count-badge" id="day-count-badge"></span>
+          </div>
         </div>
+
         <span id="today-badge" style="display: none" class="day-today-badge"
           >● Hôm nay</span
         >
-        <span class="day-count-badge" id="day-count-badge"></span>
       </div>
 
       <!-- Table -->
@@ -1211,18 +1312,16 @@
       function renderDayPicker() {
         const currentKey = dayKeys[currentDayIdx] || "";
         const todayKey = toDateKey(new Date().toISOString());
-        const [y, m, d] = (currentKey || "--").split("-");
         const isToday = currentKey === todayKey;
         const count = (dayMap[currentKey] || []).length;
 
-        document.getElementById("disp-day").textContent = d || "—";
-        document.getElementById("disp-month").textContent = m || "—";
-        document.getElementById("disp-year").textContent = y || "—";
-
-        ["disp-day", "disp-month", "disp-year"].forEach((id) => {
-          document.getElementById(id).className =
-            "day-unit-value" + (isToday ? " today-val" : "");
-        });
+        // Cập nhật trigger button
+        if (currentKey && currentKey !== "unknown") {
+          const [y, m, d] = currentKey.split("-");
+          const el = document.getElementById("datepicker-date");
+          el.textContent = `${d}/${m}/${y}`;
+          el.className = "datepicker-date" + (isToday ? " today-val" : "");
+        }
 
         document.getElementById("today-badge").style.display = isToday
           ? "inline-flex"
@@ -1231,41 +1330,171 @@
           ? `${count} bản ghi`
           : "Không có dữ liệu";
 
-        document.getElementById("btn-prev").disabled =
-          currentDayIdx >= dayKeys.length - 1;
-        document.getElementById("btn-next").disabled = currentDayIdx <= 0;
+        // Re-render calendar grid nếu đang mở
+        if (document.getElementById("cal-popup").classList.contains("open")) {
+          renderCalGrid();
+        }
       }
 
-      // Điều chỉnh ngày/tháng/năm độc lập, tìm ngày gần nhất có dữ liệu
-      function adjustUnit(unit, delta) {
-        const currentKey = dayKeys[currentDayIdx] || "";
-        if (!currentKey || currentKey === "unknown") return;
+      /* ── CALENDAR STATE ── */
+      let calViewYear = new Date().getFullYear();
+      let calViewMonth = new Date().getMonth() + 1; // 1-12
 
-        let [y, m, d] = currentKey.split("-").map(Number);
+      function toggleCalendar() {
+        const popup = document.getElementById("cal-popup");
+        const trigger = document.getElementById("datepicker-trigger");
+        const isOpen = popup.classList.contains("open");
+        if (isOpen) {
+          popup.classList.remove("open");
+          trigger.classList.remove("open");
+        } else {
+          // Sync view tới tháng của ngày đang chọn
+          const currentKey = dayKeys[currentDayIdx] || "";
+          if (currentKey && currentKey !== "unknown") {
+            const [y, m] = currentKey.split("-").map(Number);
+            calViewYear = y;
+            calViewMonth = m;
+          }
+          renderCalSelects();
+          renderCalGrid();
+          popup.classList.add("open");
+          trigger.classList.add("open");
+        }
+      }
 
-        if (unit === "day") d += delta;
-        if (unit === "month") m += delta;
-        if (unit === "year") y += delta;
+      function closeCalendar() {
+        document.getElementById("cal-popup").classList.remove("open");
+        document.getElementById("datepicker-trigger").classList.remove("open");
+      }
 
-        // Normalize: xử lý tràn tháng/ngày
-        const ref = new Date(y, m - 1, d);
-        const targetKey = toDateKey(ref.toISOString());
+      // Đóng khi click ngoài
+      document.addEventListener("click", function (e) {
+        const nav = document.getElementById("day-nav");
+        if (!nav.contains(e.target)) closeCalendar();
+      });
 
-        // Tìm key khớp chính xác
-        const exactIdx = dayKeys.indexOf(targetKey);
-        if (exactIdx !== -1) {
-          selectDay(exactIdx);
-          return;
+      function renderCalSelects() {
+        const monthSel = document.getElementById("cal-month-sel");
+        const yearSel = document.getElementById("cal-year-sel");
+        const months = [
+          "Tháng 1",
+          "Tháng 2",
+          "Tháng 3",
+          "Tháng 4",
+          "Tháng 5",
+          "Tháng 6",
+          "Tháng 7",
+          "Tháng 8",
+          "Tháng 9",
+          "Tháng 10",
+          "Tháng 11",
+          "Tháng 12",
+        ];
+
+        monthSel.innerHTML = months
+          .map(
+            (mn, i) =>
+              `<option value="${i + 1}" ${i + 1 === calViewMonth ? "selected" : ""}>${mn}</option>`,
+          )
+          .join("");
+
+        // Lấy range năm từ dữ liệu
+        const years = dayKeys
+          .filter((k) => k !== "unknown")
+          .map((k) => parseInt(k.split("-")[0]))
+          .filter(Boolean);
+        const minYear = years.length
+          ? Math.min(...years)
+          : new Date().getFullYear();
+        const maxYear = new Date().getFullYear();
+
+        yearSel.innerHTML = "";
+        for (let y = maxYear; y >= minYear; y--) {
+          yearSel.innerHTML += `<option value="${y}" ${y === calViewYear ? "selected" : ""}>${y}</option>`;
+        }
+      }
+
+      function renderCalGrid() {
+        const grid = document.getElementById("cal-grid");
+        const todayKey = toDateKey(new Date().toISOString());
+        const selectedKey = dayKeys[currentDayIdx] || "";
+        const daysInMonth = new Date(calViewYear, calViewMonth, 0).getDate();
+        const firstDow = new Date(calViewYear, calViewMonth - 1, 1).getDay(); // 0=Sun
+        // Adjust so Monday = 0
+        const startOffset = (firstDow + 6) % 7;
+
+        const dows = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+        let html = dows.map((d) => `<div class="cal-dow">${d}</div>`).join("");
+
+        // Empty cells before first day
+        for (let i = 0; i < startOffset; i++)
+          html += `<div class="cal-day empty"></div>`;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const key = `${calViewYear}-${String(calViewMonth).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+          const hasData = !!dayMap[key];
+          const isToday = key === todayKey;
+          const isSel = key === selectedKey;
+          const cls = [
+            "cal-day",
+            hasData ? "has-data" : "no-data",
+            isToday ? "is-today" : "",
+            isSel ? "selected" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          const onclick = hasData ? `calSelectDay('${key}')` : "";
+          html += `<div class="${cls}" ${onclick ? `onclick="${onclick}"` : ""}>${d}</div>`;
         }
 
-        // Không có dữ liệu ngày đó → tìm ngày gần nhất
-        const sorted = [...dayKeys].sort((a, b) => {
-          const da = Math.abs(new Date(a) - new Date(targetKey));
-          const db = Math.abs(new Date(b) - new Date(targetKey));
-          return da - db;
-        });
-        const nearestIdx = dayKeys.indexOf(sorted[0]);
-        selectDay(nearestIdx);
+        grid.innerHTML = html;
+      }
+
+      function calSelectDay(key) {
+        const idx = dayKeys.indexOf(key);
+        if (idx === -1) return;
+        selectDay(idx);
+        closeCalendar();
+      }
+
+      function calShiftMonth(delta) {
+        calViewMonth += delta;
+        if (calViewMonth > 12) {
+          calViewMonth = 1;
+          calViewYear++;
+        }
+        if (calViewMonth < 1) {
+          calViewMonth = 12;
+          calViewYear--;
+        }
+        renderCalSelects();
+        renderCalGrid();
+      }
+
+      function calGoToMonth() {
+        calViewMonth = parseInt(document.getElementById("cal-month-sel").value);
+        renderCalGrid();
+      }
+
+      function calGoToYear() {
+        calViewYear = parseInt(document.getElementById("cal-year-sel").value);
+        renderCalSelects();
+        renderCalGrid();
+      }
+
+      function calGoToday() {
+        const todayKey = toDateKey(new Date().toISOString());
+        const idx = dayKeys.indexOf(todayKey);
+        if (idx !== -1) {
+          selectDay(idx);
+          closeCalendar();
+        } else {
+          // Không có dữ liệu hôm nay, chỉ navigate calendar về tháng hiện tại
+          calViewYear = new Date().getFullYear();
+          calViewMonth = new Date().getMonth() + 1;
+          renderCalSelects();
+          renderCalGrid();
+        }
       }
 
       function selectDay(idx) {
