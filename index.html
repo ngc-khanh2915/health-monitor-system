@@ -880,8 +880,23 @@
 
     <script>
       let allData = [];
-      let alertDismissed = false; // reset mỗi lần load mới
       let alarmOscillators = [];
+
+      // Đọc trạng thái đã xác nhận từ localStorage
+      // Tự reset vào ngày mới để cảnh báo ngày hôm sau vẫn hoạt động
+      const savedDate = localStorage.getItem("alertDismissedDate");
+      const todayStr = new Date().toISOString().slice(0, 10);
+      let alertDismissed =
+        savedDate === todayStr &&
+        localStorage.getItem("alertDismissed") === "true";
+
+      function dismissAlert() {
+        document.getElementById("alert-overlay").classList.remove("active");
+        stopAlarm();
+        alertDismissed = true;
+        localStorage.setItem("alertDismissed", "true");
+        localStorage.setItem("alertDismissedDate", todayStr);
+      }
 
       /* ── TIẾNG RÚ ALARM (Web Audio API) ── */
       function startAlarm() {
@@ -940,7 +955,7 @@
         alarmOscillators = [];
       }
 
-      /* ── HIỆN / TẮT ALERT ── */
+      /* ── CHECK & TRIGGER ALERT ── */
       function showAlert(warningRows) {
         const list = document.getElementById("alert-list");
         list.innerHTML = warningRows
@@ -958,13 +973,6 @@
         startAlarm();
       }
 
-      function dismissAlert() {
-        document.getElementById("alert-overlay").classList.remove("active");
-        stopAlarm();
-        alertDismissed = true;
-      }
-
-      /* ── CHECK & TRIGGER ALERT ── */
       function checkAlerts(data) {
         if (alertDismissed) return; // chờ lần load tiếp theo
         const warned = data.filter((r) => {
