@@ -1188,11 +1188,10 @@
       }
 
       function checkAlerts(data) {
-        if (alertDismissed) return; // chờ lần load tiếp theo
-        const warned = data.filter((r) => {
-          const { cls } = classifyStatus(r);
-          return cls === "warning" || cls === "danger" || cls === "critical";
-        });
+        if (alertDismissed) return;
+        const warned = data.filter(
+          (r) => (r.trangthai || "").toLowerCase() === "nguy_hiem_can_cap_cuu",
+        );
         if (warned.length > 0) showAlert(warned);
       }
 
