@@ -84,6 +84,22 @@ app.get("/sinh-ton/:mabenhnhan", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// ===== API 4: danh sách cảnh báo =====
+app.get("/canh-bao", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("nhatkycanhbao")
+      .select("*")
+      .order("thoigianphathien", { ascending: false });
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (err) {
+    console.error("API /canh-bao error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // ===== Start server =====
 const PORT = process.env.PORT || 3000;
