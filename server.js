@@ -21,7 +21,7 @@ app.use(express.json());
 // Supabase config
 const supabaseUrl = "https://bducrozjrbdkueytgzsv.supabase.co";
 const supabaseKey =
-  "eeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkdWNyb3pqcmJka3VleXRnenN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzgwNDYsImV4cCI6MjA4ODgxNDA0Nn0.zw-G1eX0Wh-MIJUNgc2ow2s_CRsMIDQQA9sSGPvfniM";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJkdWNyb3pqcmJka3VleXRnenN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMzgwNDYsImV4cCI6MjA4ODgxNDA0Nn0.zw-G1eX0Wh-MIJUNgc2ow2s_CRsMIDQQA9sSGPvfniM";
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
